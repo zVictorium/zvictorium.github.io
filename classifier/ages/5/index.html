@@ -30,7 +30,7 @@
         <div class="row">
           <div class="col-12 col-md-4 offset-md-4 text-center">
             <video id="video" playsinline autoplay style="width: 1px;"></video>
-            <button class="btn btn-primary mb-2" id="change-camera" onclick="changeCamera();">Canviar Càmera</button>
+            <button class="btn btn-primary mb-2" id="change-camera" onclick="changeCamera();">Change Camera</button>
             <canvas id="canvas" width="400" height="400" style="max-width: 100%;"></canvas>
             <canvas id="anothercanvas" width="150" height="150" style="display: none"></canvas>
             <div id="result" style="font-size: 5rem;"></div>            
@@ -53,12 +53,12 @@
     var currentStream = null;
     var facingMode = "user";
 
-    var modelo = null;
+    var model = null;
 
     (async() => {
       console.log("Loading model...");
-      modelo = await tf.loadLayersModel("/classifier/ages/5/model/model.json");
-      console.log("Modelo loaded");
+      model = await tf.loadLayersModel("/classifier/ages/5/model/model.json");
+      console.log("Model loaded");
     })();
 
     window.onload = function() {
@@ -124,7 +124,7 @@
     }
 
     function predict() {
-      if (modelo != null) {
+      if (model != null) {
         resample_single(canvas, 100, 100, anothercanvas);
 
         var ctx2 = anothercanvas.getContext("2d");
@@ -150,7 +150,7 @@
         arr = [arr];
 
         var tensor = tf.tensor4d(arr);
-        var result = modelo.predict(tensor).dataSync();
+        var result = model.predict(tensor).dataSync();
         
         var maxPerCent = Math.max(...result);
         var resultIndex = result.indexOf(maxPerCent);

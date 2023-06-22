@@ -56,9 +56,9 @@
     var modelo = null;
 
     (async() => {
-      console.log("Loading model...");
+      console.log("Cargando modelo...");
       modelo = await tf.loadLayersModel("/classifier/animals/model/model.json");
-      console.log("Modelo loaded");
+      console.log("Modelo cargado");
     })();
 
     window.onload = function() {
@@ -152,13 +152,13 @@
         var tensor = tf.tensor4d(arr);
         var result = modelo.predict(tensor).dataSync();
 
-        var response;
+        var respuesta;
         if (result >= 0.5) {
-          response = "Dog";
+          respuesta = "Dog";
         } else {
-          response = "Cat";
+          respuesta = "Cat";
         }
-        document.getElementById("result").innerHTML = response;
+        document.getElementById("result").innerHTML = respuesta;
 
       }
 

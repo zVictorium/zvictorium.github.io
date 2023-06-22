@@ -1,16 +1,16 @@
 <!doctype html>
-<html lang="es">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" type="image/png" sizes="32x32" href="/edats/images/favicon32px.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/edats/images/favicon16px.png">
-    <title>Classificador - Edat (10)</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/classifier/ages/images/favicon32px.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/classifier/ages/images/favicon16px.png">
+    <title>Classifier - Age [5]</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
     <style>
-      #resultado {
+      #result {
         font-weight: bold;
         font-size: 6rem;
         text-align: center;
@@ -21,21 +21,19 @@
     
     <main>
       <div class="px-4 py-2 my-2 text-center border-bottom">
-        <img class="d-block mx-auto mb-2" src="/edats/images/logo.png" alt="" width="80" height="80">
-        <h1 class="display-5 fw-bold">Classificador - Edat (10)</h1>
+        <img class="d-block mx-auto mb-2" src="/classifier/ages/images/logo.png" alt="" width="80" height="80">
+        <h1 class="display-5 fw-bold">Classifier - Age [5]</h1>
         </div>
       </div>
-
-      <!-- <div class="b-example-divider"></div> -->
 
       <div class="container mt-5">
         <div class="row">
           <div class="col-12 col-md-4 offset-md-4 text-center">
             <video id="video" playsinline autoplay style="width: 1px;"></video>
-            <button class="btn btn-primary mb-2" id="cambiar-camara" onclick="cambiarCamara();">Canviar Càmera</button>
+            <button class="btn btn-primary mb-2" id="change-camera" onclick="changeCamera();">Canviar Càmera</button>
             <canvas id="canvas" width="400" height="400" style="max-width: 100%;"></canvas>
-            <canvas id="otrocanvas" width="150" height="150" style="display: none"></canvas>
-            <div id="resultado" style="font-size: 5rem;"></div>            
+            <canvas id="anothercanvas" width="150" height="150" style="display: none"></canvas>
+            <div id="result" style="font-size: 5rem;"></div>            
           </div>
         </div>
       </div>
@@ -47,10 +45,10 @@
 
   <script type="text/javascript">
 
-    var tamano = 400;
+    var size = 400;
     var video = document.getElementById("video");
     var canvas = document.getElementById("canvas");
-    var otrocanvas = document.getElementById("otrocanvas");
+    var anothercanvas = document.getElementById("anothercanvas");
     var ctx = canvas.getContext("2d");
     var currentStream = null;
     var facingMode = "user";
@@ -58,42 +56,42 @@
     var modelo = null;
 
     (async() => {
-      console.log("Cargando modelo...");
-      modelo = await tf.loadLayersModel("/edats/10/model/model.json");
-      console.log("Modelo cargado");
+      console.log("Loading model...");
+      modelo = await tf.loadLayersModel("/classifier/ages/5/model/model.json");
+      console.log("Modelo loaded");
     })();
 
     window.onload = function() {
-      mostrarCamara();
+      showCamera();
     }
 
-    function mostrarCamara() {
-      var opciones = {
+    function showCamera() {
+      var options = {
         audio: false,
         video: {
-          width: tamano, height: tamano
+          width: size, height: size
         }
       }
 
       if (navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia(opciones)
+        navigator.mediaDevices.getUserMedia(options)
             .then(function(stream) {
               currentStream = stream;
               video.srcObject = currentStream;
-              procesarCamara();
-              predecir();
+              processCamera();
+              predict();
             })
             .catch(function(err) {
-              alert("No se pudo utilizar la camara :(");
+              alert("Could not use the camera");
               console.log(err);
               alert(err);
             })
       } else {
-        alert("No existe la funcion getUserMedia");
+        alert("There is no getUserMedia function");
       }
     }
 
-    function cambiarCamara() {
+    function changeCamera() {
           if (currentStream) {
               currentStream.getTracks().forEach(track => {
                   track.stop();
@@ -102,48 +100,47 @@
 
           facingMode = facingMode == "user" ? "environment" : "user";
 
-          var opciones = {
+          var options = {
               audio: false,
               video: {
-                  facingMode: facingMode, width: tamano, height: tamano
+                  facingMode: facingMode, width: size, height: size
               }
           };
 
 
-          navigator.mediaDevices.getUserMedia(opciones)
+          navigator.mediaDevices.getUserMedia(options)
               .then(function(stream) {
                   currentStream = stream;
                   video.srcObject = currentStream;
               })
               .catch(function(err) {
-                  console.log("Oops, hubo un error", err);
+                  console.log("Oops, there was an error", err);
               })
       }
 
-    function procesarCamara() {
-      ctx.drawImage(video, 0, 0, tamano, tamano, 0, 0, tamano, tamano);
-      setTimeout(procesarCamara, 20);
+    function processCamera() {
+      ctx.drawImage(video, 0, 0, size, size, 0, 0, size, size);
+      setTimeout(processCamera, 20);
     }
 
-    function predecir() {
+    function predict() {
       if (modelo != null) {
-        resample_single(canvas, 100, 100, otrocanvas);
+        resample_single(canvas, 100, 100, anothercanvas);
 
-        //Hacer la predicción
-        var ctx2 = otrocanvas.getContext("2d");
+        var ctx2 = anothercanvas.getContext("2d");
         var imgData = ctx2.getImageData(0,0, 100, 100);
 
         var arr = [];
         var arr100 = [];
 
         for (var p=0; p < imgData.data.length; p+= 4) {
-          var rojo = imgData.data[p] / 255;
-          var verde = imgData.data[p+1] / 255;
-          var azul = imgData.data[p+2] / 255;
+          var red = imgData.data[p] / 255;
+          var green = imgData.data[p+1] / 255;
+          var blue = imgData.data[p+2] / 255;
 
-          var gris = (rojo+verde+azul)/3;
+          var gray = (red+green+azul)/3;
 
-          arr100.push([gris]);
+          arr100.push([gray]);
           if (arr100.length == 100) {
             arr.push(arr100);
             arr100 = [];
@@ -153,30 +150,22 @@
         arr = [arr];
 
         var tensor = tf.tensor4d(arr);
-        var resultado = modelo.predict(tensor).dataSync();
+        var result = modelo.predict(tensor).dataSync();
         
-        var maxPerCent = Math.max(...resultado);
-        var resultadoIndex = resultado.indexOf(maxPerCent);
+        var maxPerCent = Math.max(...result);
+        var resultIndex = result.indexOf(maxPerCent);
         
-        const edats = ["0 - 10", "10 - 20", "20 - 30", "30 - 40", "40 - 50", "50 - 60", "60 - 70", "70 - 80", "80 - 90", "90 - 100"];
-        var respuesta;
+        const ages = ["0-5", "5-10", "10-15", "15-20", "20-25", "25-30", "30-35", "35-40", "40-45", "45-50", "50-55", "55-60", "60-65", "65-70", "70-75", "75-80", "80-85", "85-90", "90-95", "95-100"];
+        var response;
 
-        // if (resultado >= 0.5) {
-        //   respuesta = "Gos";
-        // } else {
-        //   respuesta = "Gat";
-        // }
-        respuesta = edats[resultadoIndex]
-        document.getElementById("resultado").innerHTML = respuesta;
+        response = ages[resultIndex]
+        document.getElementById("result").innerHTML = response;
 
       }
 
-      setTimeout(predecir, 150);
+      setTimeout(predict, 150);
     }
 
-    /**
-       * Hermite resize - fast image resize/resample using Hermite filter.
-       */
       function resample_single(canvas, width, height, resize_canvas) {
           var width_source = canvas.width;
           var height_source = canvas.height;
@@ -211,23 +200,19 @@
                   for (var yy = yy_start; yy < yy_stop; yy++) {
                       var dy = Math.abs(center_y - (yy + 0.5)) / ratio_h_half;
                       var center_x = (i + 0.5) * ratio_w;
-                      var w0 = dy * dy; //pre-calc part of w
+                      var w0 = dy * dy;
                       var xx_start = Math.floor(i * ratio_w);
                       var xx_stop = Math.ceil((i + 1) * ratio_w);
                       for (var xx = xx_start; xx < xx_stop; xx++) {
                           var dx = Math.abs(center_x - (xx + 0.5)) / ratio_w_half;
                           var w = Math.sqrt(w0 + dx * dx);
                           if (w >= 1) {
-                              //pixel too far
                               continue;
                           }
-                          //hermite filter
                           weight = 2 * w * w * w - 3 * w * w + 1;
                           var pos_x = 4 * (xx + yy * width_source);
-                          //alpha
                           gx_a += weight * data[pos_x + 3];
                           weights_alpha += weight;
-                          //colors
                           if (data[pos_x + 3] < 255)
                               weight = weight * data[pos_x + 3] / 250;
                           gx_r += weight * data[pos_x];
@@ -242,7 +227,6 @@
                   data2[x2 + 3] = gx_a / weights_alpha;
               }
           }
-
 
           ctx2.putImageData(img2, 0, 0);
       }
